@@ -13,21 +13,31 @@ namespace Flow_Api.Middleware
         private readonly RequestDelegate _next;
         private readonly IMemoryCache _cache;
         private readonly ILogger<RateLimiterMiddleware> _logger;
-        private readonly int _maxRequests = 5; // Maximum requests
-        private readonly TimeSpan _timeWindow = TimeSpan.FromMinutes(5); // Time window
+        private readonly IWebHostEnvironment _env;
+        private readonly int _maxRequests = 5;
+        private readonly TimeSpan _timeWindow = TimeSpan.FromMinutes(5);
 
         public RateLimiterMiddleware(
             RequestDelegate next,
             IMemoryCache cache,
-            ILogger<RateLimiterMiddleware> logger)
+            ILogger<RateLimiterMiddleware> logger,
+            IWebHostEnvironment env)
         {
             _next = next;
             _cache = cache;
             _logger = logger;
+            _env = env;
         }
 
         public async Task Invoke(HttpContext context)
         {
+            // Only apply rate limiting in production environment
+            if (_env.IsDevelopment())
+            {
+                await _next(context);
+                return;
+            }
+
             // Only apply rate limiting to authentication endpoints
             if (context.Request.Path.StartsWithSegments("/api/auth"))
             {
