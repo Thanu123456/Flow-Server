@@ -88,13 +88,14 @@ namespace Flow_Api.Services.Implementations
                 AccessToken = accessToken,
                 RefreshToken = refreshToken,
                 Expiration = DateTime.UtcNow.AddMinutes(_jwtSettings.AccessTokenExpirationMinutes),
+                // ... inside LoginAsync, RegisterAsync, and RefreshTokenAsync where UserDto is constructed:
                 User = new UserDto
                 {
                     Id = user.Id,
                     UserName = user.UserName ?? string.Empty,
                     Email = user.Email ?? string.Empty,
-                    FirstName = user.FirstName,
-                    LastName = user.LastName,
+                    FirstName = user.FirstName ?? string.Empty,
+                    LastName = user.LastName ?? string.Empty,
                     ProfileImageUrl = user.ProfileImageUrl ?? string.Empty,
                     Roles = userRoles.ToList(),
                     Permissions = userPermissions.ToList()
@@ -219,13 +220,14 @@ namespace Flow_Api.Services.Implementations
                 AccessToken = newAccessToken,
                 RefreshToken = newRefreshToken,
                 Expiration = DateTime.UtcNow.AddMinutes(_jwtSettings.AccessTokenExpirationMinutes),
+                // ... inside LoginAsync, RegisterAsync, and RefreshTokenAsync where UserDto is constructed:
                 User = new UserDto
                 {
                     Id = user.Id,
                     UserName = user.UserName ?? string.Empty,
                     Email = user.Email ?? string.Empty,
-                    FirstName = user.FirstName,
-                    LastName = user.LastName,
+                    FirstName = user.FirstName ?? string.Empty,
+                    LastName = user.LastName ?? string.Empty,
                     ProfileImageUrl = user.ProfileImageUrl ?? string.Empty,
                     Roles = userRoles.ToList(),
                     Permissions = userPermissions.ToList()
