@@ -5,7 +5,7 @@
 namespace Flow_Api.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class MakeProfileImageUrlNullable : Migration
+    public partial class AddMissingChanges : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

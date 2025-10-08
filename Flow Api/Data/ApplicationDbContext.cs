@@ -26,82 +26,80 @@ namespace Flow_Api.Data
 
         // In your Data/ApplicationDbContext.cs file
 
-        protected override void OnModelCreating(ModelBuilder builder)
-        {
-            base.OnModelCreating(builder);
+       protected override void OnModelCreating(ModelBuilder builder)
+{
+    base.OnModelCreating(builder);
 
-            // Configure ApplicationUser
-            builder.Entity<ApplicationUser>(entity =>
-            {
-                entity.Property(u => u.FirstName).HasMaxLength(50);
-                entity.Property(u => u.LastName).HasMaxLength(50);
+    // Configure ApplicationUser
+    builder.Entity<ApplicationUser>(entity =>
+    {
+        entity.Property(u => u.FirstName).HasMaxLength(50).IsRequired();
+        entity.Property(u => u.LastName).HasMaxLength(50).IsRequired();
+        entity.Property(u => u.ProfileImageUrl).HasMaxLength(255).IsRequired(false);
+        entity.Property(u => u.IsActive).HasDefaultValue(true);
+        entity.Property(u => u.CreatedDate).HasDefaultValueSql("NOW()");
+    });
 
-                // Add this line to explicitly make ProfileImageUrl optional/nullable
-                entity.Property(u => u.ProfileImageUrl).HasMaxLength(255).IsRequired(false);
+    // Configure ApplicationRole
+    builder.Entity<ApplicationRole>(entity =>
+    {
+        entity.Property(r => r.Description).HasMaxLength(255);
+    });
 
-                entity.Property(u => u.IsActive).HasDefaultValue(true);
-                entity.Property(u => u.CreatedDate).HasDefaultValueSql("NOW()");
-            });
+    // Configure Permission
+    builder.Entity<Permission>(entity =>
+    {
+        entity.HasKey(p => p.Id);
+        entity.Property(p => p.Name).IsRequired().HasMaxLength(100);
+        entity.Property(p => p.Description).HasMaxLength(255);
+        entity.Property(p => p.Category).IsRequired().HasMaxLength(50);
+        entity.Property(p => p.CreatedDate).HasDefaultValueSql("NOW()");
+    });
 
-            // Rest of your configuration remains the same...
-            // Configure ApplicationRole
-            builder.Entity<ApplicationRole>(entity =>
-            {
-                entity.Property(r => r.Description).HasMaxLength(255);
-            });
+    // Configure UserOtp
+    builder.Entity<UserOtp>(entity =>
+    {
+        entity.HasKey(o => o.Id);
+        entity.Property(o => o.UserId).IsRequired(false); // Explicitly set as not required
+        entity.Property(o => o.OtpCode).IsRequired().HasMaxLength(6);
+        entity.Property(o => o.OtpType).IsRequired();
+        entity.Property(o => o.ExpiryDate).IsRequired();
+        entity.Property(o => o.IsUsed).IsRequired().HasDefaultValue(false);
+        entity.Property(o => o.CreatedDate).HasDefaultValueSql("NOW()");
+        entity.HasOne<ApplicationUser>()
+            .WithMany()
+            .HasForeignKey(o => o.UserId)
+            .IsRequired(false) // Explicitly set as not required
+            .OnDelete(DeleteBehavior.Cascade);
+    });
 
-            // Configure Permission
-            builder.Entity<Permission>(entity =>
-            {
-                entity.HasKey(p => p.Id);
-                entity.Property(p => p.Name).IsRequired().HasMaxLength(100);
-                entity.Property(p => p.Description).HasMaxLength(255);
-                entity.Property(p => p.Category).IsRequired().HasMaxLength(50);
-                entity.Property(p => p.CreatedDate).HasDefaultValueSql("NOW()");
-            });
+    // Configure RefreshToken
+    builder.Entity<RefreshToken>(entity =>
+    {
+        entity.HasKey(r => r.Id);
+        entity.Property(r => r.UserId).IsRequired(false); // Explicitly set as not required
+        entity.Property(r => r.Token).IsRequired();
+        entity.Property(r => r.JwtId).IsRequired();
+        entity.Property(r => r.IsUsed).IsRequired().HasDefaultValue(false);
+        entity.Property(r => r.IsRevoked).IsRequired().HasDefaultValue(false);
+        entity.Property(r => r.IssuedAt).IsRequired();
+        entity.Property(r => r.ExpiresAt).IsRequired();
+        entity.Property(r => r.CreatedDate).HasDefaultValueSql("NOW()");
+        entity.HasOne<ApplicationUser>()
+            .WithMany()
+            .HasForeignKey(r => r.UserId)
+            .IsRequired(false) // Explicitly set as not required
+            .OnDelete(DeleteBehavior.Cascade);
+        entity.HasIndex(r => r.Token).IsUnique();
+    });
 
-            // Configure UserOtp
-            builder.Entity<UserOtp>(entity =>
-            {
-                entity.HasKey(o => o.Id);
-                entity.Property(o => o.OtpCode).IsRequired().HasMaxLength(6);
-                entity.Property(o => o.OtpType).IsRequired();
-                entity.Property(o => o.ExpiryDate).IsRequired();
-                entity.Property(o => o.IsUsed).IsRequired().HasDefaultValue(false);
-                entity.Property(o => o.CreatedDate).HasDefaultValueSql("NOW()");
-                entity.HasOne<ApplicationUser>()
-                    .WithMany()
-                    .HasForeignKey(o => o.UserId)
-                    .OnDelete(DeleteBehavior.Cascade);
-            });
-
-            // Configure RefreshToken
-            builder.Entity<RefreshToken>(entity =>
-            {
-                entity.HasKey(r => r.Id);
-                entity.Property(r => r.Token).IsRequired();
-                entity.Property(r => r.JwtId).IsRequired();
-                entity.Property(r => r.IsUsed).IsRequired().HasDefaultValue(false);
-                entity.Property(r => r.IsRevoked).IsRequired().HasDefaultValue(false);
-                entity.Property(r => r.IssuedAt).IsRequired();
-                entity.Property(r => r.ExpiresAt).IsRequired();
-                entity.Property(r => r.CreatedDate).HasDefaultValueSql("NOW()");
-                entity.HasOne<ApplicationUser>()
-                    .WithMany()
-                    .HasForeignKey(r => r.UserId)
-                    .OnDelete(DeleteBehavior.Cascade);
-
-                // Add index for Token
-                entity.HasIndex(r => r.Token).IsUnique();
-            });
-
-            // Configure RolePermissions (many-to-many relationship)
-            builder.Entity<ApplicationRole>()
-                .HasMany<ApplicationRoleClaim>()
-                .WithOne()
-                .HasForeignKey(rc => rc.RoleId)
-                .IsRequired();
-        }
+    // Configure RolePermissions (many-to-many relationship)
+    builder.Entity<ApplicationRole>()
+        .HasMany<ApplicationRoleClaim>()
+        .WithOne()
+        .HasForeignKey(rc => rc.RoleId)
+        .IsRequired();
+}
     }
 
         // UserOtp entity

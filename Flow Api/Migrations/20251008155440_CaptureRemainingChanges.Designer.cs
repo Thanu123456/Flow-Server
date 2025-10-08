@@ -9,11 +9,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace Flow_Api.Data.Migrations
+namespace Flow_Api.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250928072927_MakeProfileImageUrlNullable")]
-    partial class MakeProfileImageUrlNullable
+    [Migration("20251008155440_CaptureRemainingChanges")]
+    partial class CaptureRemainingChanges
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -211,7 +211,7 @@ namespace Flow_Api.Data.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("text");
 
-                    b.Property<DateTime>("CreatedDate")
+                    b.Property<DateTime?>("CreatedDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
                         .HasDefaultValueSql("NOW()");
