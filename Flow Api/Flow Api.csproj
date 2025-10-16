@@ -30,10 +30,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Data\Migrations\" />
-    <Folder Include="wwwroot\templates\emails\" />
+    <Folder Include="Data\Migrations\Master\" />
+    <Folder Include="Data\Migrations\Tenant\" />
+    <Folder Include="Scripts\" />
+    <Folder Include="wwwroot\exports\reports\" />
+    <Folder Include="wwwroot\exports\temp\" />
     <Folder Include="wwwroot\uploads\brands\" />
-    <Folder Include="wwwroot\uploads\categories\" />
+    <Folder Include="wwwroot\uploads\users\" />
     <Folder Include="wwwroot\uploads\products\" />
   </ItemGroup>
 
