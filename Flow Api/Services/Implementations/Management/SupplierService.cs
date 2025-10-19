@@ -1,0 +1,6 @@
+﻿namespace Flow_Api.Services.Implementations.Management
+{
+    public class SupplierService
+    {
+    }
+}
