@@ -1,4 +1,6 @@
 ﻿using Flow_Api.Dtos.Auth;
+using Flow_Api.Dtos.Auth.Request;
+using Flow_Api.Dtos.Common;
 using Flow_Api.Models.Entities;
 using Flow_Api.Services.Interfaces.Auth;
 using Microsoft.AspNetCore.Authorization;
@@ -7,9 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Flow_Api.Controllers.Public
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class AuthController : ControllerBase
+    public class AuthController : BaseApiController
     {
         private readonly IAuthService _authService;
 
@@ -18,143 +18,39 @@ namespace Flow_Api.Controllers.Public
             _authService = authService;
         }
 
+        [AllowAnonymous] // Only this endpoint allows anonymous access
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
+        public async Task<ActionResult<ApiResponse<object>>> Login([FromBody] LoginRequestDto request)
         {
-            try
-            {
-                var result = await _authService.LoginAsync(loginDto);
-                return Ok(result);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+            var result = await _authService.LoginAsync(request, GetIpAddress());
+            return Ok(ApiResponse<object>.SuccessResponse(result, "Login successful"));
         }
 
+        [AllowAnonymous] // Only this endpoint allows anonymous access
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterDto registerDto)
+        public async Task<ActionResult<ApiResponse<object>>> Register([FromBody] RegisterRequestDto request)
         {
-            try
-            {
-                var result = await _authService.RegisterAsync(registerDto);
-                return Ok(result);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+            var result = await _authService.RegisterAsync(request, GetIpAddress());
+            return Ok(ApiResponse<object>.SuccessResponse(
+                result,
+                "Registration submitted successfully. Please wait for admin approval."
+            ));
         }
 
-        [HttpPost("refresh-token")]
-        public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenDto refreshTokenDto)
-        {
-            try
-            {
-                var result = await _authService.RefreshTokenAsync(refreshTokenDto);
-                return Ok(result);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-        }
-
-        [Authorize]
+        [Authorize] // Only this endpoint requires auth
         [HttpPost("logout")]
-        public async Task<IActionResult> Logout()
+        public async Task<ActionResult<ApiResponse<object>>> Logout()
         {
-            var userId = User.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier")?.Value;
-            if (string.IsNullOrEmpty(userId))
-            {
-                return BadRequest(new { message = "Invalid user" });
-            }
-
-            var result = await _authService.LogoutAsync(userId);
-            if (result)
-            {
-                return Ok(new { message = "Logged out successfully" });
-            }
-
-            return BadRequest(new { message = "Logout failed" });
+            await _authService.LogoutAsync(GetCurrentUserId());
+            return Ok(ApiResponse<object>.SuccessResponse(null, "Logout successful"));
         }
 
-        [HttpPost("forgot-password")]
-        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDto forgotPasswordDto)
+        [AllowAnonymous] // Only this endpoint allows anonymous access
+        [HttpPost("refresh-token")]
+        public async Task<ActionResult<ApiResponse<object>>> RefreshToken([FromBody] string refreshToken)
         {
-            try
-            {
-                var result = await _authService.ForgotPasswordAsync(forgotPasswordDto);
-                return Ok(new { message = "If your email address exists in our database, you will receive a password reset OTP." });
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-        }
-
-        [HttpPost("reset-password")]
-        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto resetPasswordDto)
-        {
-            try
-            {
-                var result = await _authService.ResetPasswordAsync(resetPasswordDto);
-                return Ok(new { message = "Password reset successful" });
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-        }
-
-        [HttpPost("verify-otp")]
-        public async Task<IActionResult> VerifyOtp([FromBody] VerifyOtpDto verifyOtpDto)
-        {
-            try
-            {
-                var result = await _authService.VerifyOtpAsync(verifyOtpDto);
-                return Ok(new { message = "OTP verified successfully" });
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-        }
-
-        [HttpPost("external-login")]
-        public async Task<IActionResult> ExternalLogin([FromBody] ExternalAuthDto externalAuthDto)
-        {
-            try
-            {
-                var result = await _authService.ExternalLoginAsync(externalAuthDto);
-                return Ok(result);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (NotImplementedException)
-            {
-                return BadRequest(new { message = "External login not implemented" });
-            }
-        }
-
-        [HttpPost("send-otp")]
-        public async Task<IActionResult> SendOtp([FromBody] ForgotPasswordDto forgotPasswordDto)
-        {
-            try
-            {
-                var result = await _authService.SendOtpAsync(forgotPasswordDto.Email, 1); // 1: Email Verification
-                if (result)
-                {
-                    return Ok(new { message = "OTP sent successfully" });
-                }
-                return BadRequest(new { message = "Failed to send OTP" });
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+            var result = await _authService.RefreshTokenAsync(refreshToken);
+            return Ok(ApiResponse<object>.SuccessResponse(result, "Token refreshed"));
         }
     }
 }
