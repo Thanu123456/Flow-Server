@@ -1,108 +1,161 @@
-﻿using Flow_Api.Dtos.User;
-using Flow_Api.Requests;
+﻿using Flow_Api.Dtos.Common;
+using Flow_Api.Dtos.User;
+using Flow_Api.Dtos.User.Request;
+using Flow_Api.Dtos.Users.Request;
+using Flow_Api.Models.Requests;
 using Flow_Api.Services.Interfaces;
+using Flow_Api.Services.Interfaces.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Flow_Api.Controllers.Admin
 {
-    [Route("api/[controller]")]
+    [Route("api/admin/[controller]")]
     [ApiController]
-
+    [Authorize]
     public class UsersController : ControllerBase
     {
         private readonly IUserService _userService;
 
         public UsersController(IUserService userService)
         {
-            _userService = userService;
+            _userService = userService ?? throw new ArgumentNullException(nameof(userService));
         }
 
         [HttpGet("{userId}")]
         public async Task<IActionResult> GetUserById(string userId)
         {
+            if (string.IsNullOrWhiteSpace(userId))
+                return BadRequest(ApiResponse<object>.ErrorResponse("User ID is required"));
+
             try
             {
                 var user = await _userService.GetUserByIdAsync(userId);
-                return Ok(user);
+
+                if (user == null)
+                    return NotFound(ApiResponse<object>.ErrorResponse("User not found"));
+
+                return Ok(ApiResponse<object>.SuccessResponse(user, "User retrieved successfully"));
             }
             catch (ArgumentException ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(ApiResponse<object>.ErrorResponse(ex.Message));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ApiResponse<object>.ErrorResponse($"Internal server error: {ex.Message}"));
             }
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetUsers([FromQuery] PaginationRequest paginationRequest, [FromQuery] SearchRequest searchRequest)
+        public async Task<IActionResult> GetUsers(
+            [FromQuery] PaginationRequest? paginationRequest,
+            [FromQuery] SearchRequest? searchRequest)
         {
             try
             {
-                var users = await _userService.GetUsersAsync(paginationRequest, searchRequest);
-                return Ok(users);
+                var pagination = paginationRequest ?? new PaginationRequest();
+                var search = searchRequest ?? new SearchRequest();
+
+                var users = await _userService.GetUsersAsync(pagination, search);
+                return Ok(ApiResponse<object>.SuccessResponse(users, "Users retrieved successfully"));
             }
             catch (ArgumentException ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(ApiResponse<object>.ErrorResponse(ex.Message));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ApiResponse<object>.ErrorResponse($"Internal server error: {ex.Message}"));
             }
         }
 
         [HttpPut("{userId}")]
-        public async Task<IActionResult> UpdateUser(string userId, [FromBody] UpdateUserDto updateUserDto)
+        public async Task<IActionResult> UpdateUser(string userId, [FromBody] UpdateUserRequestDto? updateUserRequestDto)
         {
+            if (string.IsNullOrWhiteSpace(userId))
+                return BadRequest(ApiResponse<object>.ErrorResponse("User ID is required"));
+
+            if (updateUserRequestDto == null)
+                return BadRequest(ApiResponse<object>.ErrorResponse("User data is required"));
+
             try
             {
                 // Ensure the ID in the URL matches the ID in the request body
-                if (userId != updateUserDto.Id)
+                if (userId != updateUserRequestDto.Id)
                 {
-                    return BadRequest(new { message = "ID mismatch" });
+                    return BadRequest(ApiResponse<object>.ErrorResponse("ID mismatch"));
                 }
 
-                var user = await _userService.UpdateUserAsync(updateUserDto);
-                return Ok(user);
+                var user = await _userService.UpdateUserAsync(updateUserRequestDto);
+                return Ok(ApiResponse<object>.SuccessResponse(user, "User updated successfully"));
             }
             catch (ArgumentException ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(ApiResponse<object>.ErrorResponse(ex.Message));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ApiResponse<object>.ErrorResponse($"Internal server error: {ex.Message}"));
             }
         }
 
         [HttpDelete("{userId}")]
         public async Task<IActionResult> DeleteUser(string userId)
         {
+            if (string.IsNullOrWhiteSpace(userId))
+                return BadRequest(ApiResponse<object>.ErrorResponse("User ID is required"));
+
             try
             {
                 var result = await _userService.DeleteUserAsync(userId);
+
                 if (result)
                 {
-                    return Ok(new { message = "User deleted successfully" });
+                    return Ok(ApiResponse<object>.SuccessResponse(null, "User deleted successfully"));
                 }
-                return BadRequest(new { message = "Failed to delete user" });
+
+                return BadRequest(ApiResponse<object>.ErrorResponse("Failed to delete user"));
             }
             catch (ArgumentException ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(ApiResponse<object>.ErrorResponse(ex.Message));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ApiResponse<object>.ErrorResponse($"Internal server error: {ex.Message}"));
             }
         }
 
         [HttpPost("assign-roles")]
         [Authorize(Policy = "RequireAdminRole")]
-        public async Task<IActionResult> AssignRoles([FromBody] AssignRoleDto assignRoleDto)
+        public async Task<IActionResult> AssignRoles([FromBody] AssignRoleDto? assignRoleDto)
         {
+            if (assignRoleDto == null)
+                return BadRequest(ApiResponse<object>.ErrorResponse("Role assignment data is required"));
+
             try
             {
                 var user = await _userService.AssignRolesAsync(assignRoleDto);
-                return Ok(user);
+                return Ok(ApiResponse<object>.SuccessResponse(user, "Role assigned successfully"));
             }
             catch (ArgumentException ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(ApiResponse<object>.ErrorResponse(ex.Message));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ApiResponse<object>.ErrorResponse($"Internal server error: {ex.Message}"));
             }
         }
 
         [HttpPost("change-password")]
-        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto changePasswordDto)
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto? changePasswordDto)
         {
+            if (changePasswordDto == null)
+                return BadRequest(ApiResponse<object>.ErrorResponse("Password change data is required"));
+
             try
             {
                 var result = await _userService.ChangePasswordAsync(
@@ -112,45 +165,55 @@ namespace Flow_Api.Controllers.Admin
 
                 if (result)
                 {
-                    return Ok(new { message = "Password changed successfully" });
+                    return Ok(ApiResponse<object>.SuccessResponse(null, "Password changed successfully"));
                 }
-                return BadRequest(new { message = "Failed to change password" });
+
+                return BadRequest(ApiResponse<object>.ErrorResponse("Failed to change password"));
             }
             catch (ArgumentException ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(ApiResponse<object>.ErrorResponse(ex.Message));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ApiResponse<object>.ErrorResponse($"Internal server error: {ex.Message}"));
             }
         }
 
         [HttpPut("profile/{userId}")]
-        public async Task<IActionResult> UpdateProfile(string userId, [FromBody] UpdateUserDto updateUserDto)
+        public async Task<IActionResult> UpdateProfile(string userId, [FromBody] UpdateUserRequestDto? updateUserDto)
         {
+            if (string.IsNullOrWhiteSpace(userId))
+                return BadRequest(ApiResponse<object>.ErrorResponse("User ID is required"));
+
+            if (updateUserDto == null)
+                return BadRequest(ApiResponse<object>.ErrorResponse("Profile data is required"));
+
             try
             {
                 // Ensure the ID in the URL matches the ID in the request body
                 if (userId != updateUserDto.Id)
                 {
-                    return BadRequest(new { message = "ID mismatch" });
+                    return BadRequest(ApiResponse<object>.ErrorResponse("ID mismatch"));
                 }
 
                 var result = await _userService.UpdateProfileAsync(userId, updateUserDto);
+
                 if (result)
                 {
-                    return Ok(new { message = "Profile updated successfully" });
+                    return Ok(ApiResponse<object>.SuccessResponse(null, "Profile updated successfully"));
                 }
-                return BadRequest(new { message = "Failed to update profile" });
+
+                return BadRequest(ApiResponse<object>.ErrorResponse("Failed to update profile"));
             }
             catch (ArgumentException ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(ApiResponse<object>.ErrorResponse(ex.Message));
             }
-        }
-
-        public class ChangePasswordDto
-        {
-            public string UserId { get; set; }
-            public string CurrentPassword { get; set; }
-            public string NewPassword { get; set; }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ApiResponse<object>.ErrorResponse($"Internal server error: {ex.Message}"));
+            }
         }
     }
 }
