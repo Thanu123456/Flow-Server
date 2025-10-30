@@ -53,7 +53,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Data\Migrations\Master\" />
     <Folder Include="Data\Migrations\Tenant\" />
     <Folder Include="Scripts\" />
     <Folder Include="wwwroot\exports\reports\" />
