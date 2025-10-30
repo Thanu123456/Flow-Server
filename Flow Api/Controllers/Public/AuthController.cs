@@ -42,7 +42,7 @@ namespace Flow_Api.Controllers.Public
         public async Task<ActionResult<ApiResponse<object>>> Logout()
         {
             await _authService.LogoutAsync(GetCurrentUserId());
-            return Ok(ApiResponse<object>.SuccessResponse(null, "Logout successful"));
+            return Ok(ApiResponse<object>.SuccessResponse(null!, "Logout successful"));
         }
 
         [AllowAnonymous] // Only this endpoint allows anonymous access

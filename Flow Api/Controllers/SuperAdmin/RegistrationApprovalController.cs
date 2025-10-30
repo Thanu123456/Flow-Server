@@ -32,7 +32,7 @@ namespace Flow_Api.Controllers.SuperAdmin
         {
             var superAdminId = GetCurrentUserId();
             await _approvalService.ApproveRegistrationAsync(request, superAdminId);
-            return Ok(ApiResponse<object>.SuccessResponse(null, "Registration approved successfully"));
+            return Ok(ApiResponse<object>.SuccessResponse(null!, "Registration approved successfully"));
         }
 
         [HttpPost("reject")]
@@ -41,7 +41,7 @@ namespace Flow_Api.Controllers.SuperAdmin
         {
             var superAdminId = GetCurrentUserId();
             await _approvalService.RejectRegistrationAsync(request, superAdminId);
-            return Ok(ApiResponse<object>.SuccessResponse(null, "Registration rejected"));
+            return Ok(ApiResponse<object>.SuccessResponse(null!, "Registration rejected"));
         }
     }
 }

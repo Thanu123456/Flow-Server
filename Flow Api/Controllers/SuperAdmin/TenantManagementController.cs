@@ -91,7 +91,7 @@ namespace Flow_Api.Controllers.SuperAdmin
                 GetIpAddress()
             );
 
-            return Ok(ApiResponse<object>.SuccessResponse(null, "Tenant suspended successfully"));
+            return Ok(ApiResponse<object>.SuccessResponse(null!, "Tenant suspended successfully"));
         }
 
         [HttpPost("activate")]
@@ -115,7 +115,7 @@ namespace Flow_Api.Controllers.SuperAdmin
                 GetIpAddress()
             );
 
-            return Ok(ApiResponse<object>.SuccessResponse(null, "Tenant activated successfully"));
+            return Ok(ApiResponse<object>.SuccessResponse(null!, "Tenant activated successfully"));
         }
 
         [HttpDelete("{id}")]
@@ -140,7 +140,7 @@ namespace Flow_Api.Controllers.SuperAdmin
                 GetIpAddress()
             );
 
-            return Ok(ApiResponse<object>.SuccessResponse(null, "Tenant deleted successfully"));
+            return Ok(ApiResponse<object>.SuccessResponse(null!, "Tenant deleted successfully"));
         }
 
         [HttpGet("{id}/statistics")]

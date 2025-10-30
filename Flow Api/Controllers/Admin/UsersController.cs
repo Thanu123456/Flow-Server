@@ -113,7 +113,7 @@ namespace Flow_Api.Controllers.Admin
 
                 if (result)
                 {
-                    return Ok(ApiResponse<object>.SuccessResponse(null, "User deleted successfully"));
+                    return Ok(ApiResponse<object>.SuccessResponse(null!, "User deleted successfully"));
                 }
 
                 return BadRequest(ApiResponse<object>.ErrorResponse("Failed to delete user"));
@@ -165,7 +165,7 @@ namespace Flow_Api.Controllers.Admin
 
                 if (result)
                 {
-                    return Ok(ApiResponse<object>.SuccessResponse(null, "Password changed successfully"));
+                    return Ok(ApiResponse<object>.SuccessResponse(null!, "Password changed successfully"));
                 }
 
                 return BadRequest(ApiResponse<object>.ErrorResponse("Failed to change password"));
@@ -201,7 +201,7 @@ namespace Flow_Api.Controllers.Admin
 
                 if (result)
                 {
-                    return Ok(ApiResponse<object>.SuccessResponse(null, "Profile updated successfully"));
+                    return Ok(ApiResponse<object>.SuccessResponse(null!, "Profile updated successfully"));
                 }
 
                 return BadRequest(ApiResponse<object>.ErrorResponse("Failed to update profile"));
