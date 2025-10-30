@@ -119,7 +119,7 @@ namespace Flow_Api.Controllers.SuperAdmin
                 GetIpAddress()
             );
 
-            return Ok(ApiResponse<object>.SuccessResponse(null, "Setting deleted"));
+            return Ok(ApiResponse<object>.SuccessResponse(null!, "Setting deleted"));
         }
     }
 }
