@@ -1,6 +1,7 @@
 using Flow_Api.Data.Contexts;
 using Flow_Api.Data.UnitOfWork;
 using Flow_Api.Middleware;
+using Flow_Api.Mappings; // <-- Added using for the mapping profiles
 using Flow_Api.Repositories.Implementations.Master;
 using Flow_Api.Repositories.Interfaces.Master;
 using Flow_Api.Services.Implementations.Auth;
@@ -23,6 +24,12 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
+// =======================================================
+// >>> THIS IS THE FIX: Register AutoMapper and its profiles
+// =======================================================
+builder.Services.AddAutoMapper(typeof(MasterMappingProfile), typeof(UserMappingProfile));
+
+
 // Configure Swagger
 builder.Services.AddSwaggerGen(c =>
 {
@@ -32,7 +39,6 @@ builder.Services.AddSwaggerGen(c =>
         Version = "v1",
         Description = "Multi-tenant POS System API"
     });
-
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Description = "JWT Authorization header using the Bearer scheme. Enter 'Bearer' [space] and then your token",
@@ -41,7 +47,6 @@ builder.Services.AddSwaggerGen(c =>
         Type = SecuritySchemeType.ApiKey,
         Scheme = "Bearer"
     });
-
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
@@ -65,7 +70,6 @@ builder.Services.AddDbContext<MasterDbContext>(options =>
 // Configure Authentication
 var jwtSettings = builder.Configuration.GetSection("Jwt");
 var secretKey = jwtSettings["SecretKey"] ?? throw new InvalidOperationException("JWT Secret Key not configured");
-
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -85,7 +89,6 @@ builder.Services.AddAuthentication(options =>
         ClockSkew = TimeSpan.Zero
     };
 });
-
 builder.Services.AddAuthorization();
 
 // Configure CORS
@@ -94,9 +97,9 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowFrontend", policy =>
     {
         policy.WithOrigins(builder.Configuration["Cors:AllowedOrigins"]?.Split(',') ?? new[] { "http://localhost:3000" })
-              .AllowAnyMethod()
-              .AllowAnyHeader()
-              .AllowCredentials();
+        .AllowAnyMethod()
+        .AllowAnyHeader()
+        .AllowCredentials();
     });
 });
 
@@ -134,7 +137,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseCors("AllowFrontend");
 
 // Custom Middleware
