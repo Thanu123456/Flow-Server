@@ -1,20 +1,30 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Flow_Api.Models.Entities.Tenant.Management;
+using Microsoft.EntityFrameworkCore;
 
 namespace Flow_Api.Data.Contexts
 {
     public class TenantDbContext : DbContext
     {
-        public TenantDbContext(DbContextOptions<TenantDbContext> options) : base(options) { }
+        public TenantDbContext(DbContextOptions<TenantDbContext> options) 
+            : base(options) 
+        { }
 
-        // Tenant-specific DbSets will be added here
-        // public DbSet<Product> Products { get; set; }
-        // public DbSet<Sale> Sales { get; set; }
-        // etc.
+        // DbSets
+        public DbSet<Brand> Brands => Set<Brand>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-            // Schema will be set dynamically via connection string or search_path
+            modelBuilder.ApplyConfigurationsFromAssembly(typeof(TenantDbContext).Assembly);
+
+        }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            if (!optionsBuilder.IsConfigured)
+            {
+                // Fallback – usually configured in Program.cs
+            }
         }
     }
 }
