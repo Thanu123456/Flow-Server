@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Flow_Api.Models.Entities.Tenant.Management;
+using Microsoft.EntityFrameworkCore;
 
 namespace Flow_Api.Data.Contexts
 {
@@ -11,10 +12,25 @@ namespace Flow_Api.Data.Contexts
         // public DbSet<Sale> Sales { get; set; }
         // etc.
 
+        //categories dbset
+        public DbSet<Category> Categories => Set<Category>();
+        
+        //TODO: add subcategory Dbset
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
             // Schema will be set dynamically via connection string or search_path
+
+            modelBuilder.Entity<Category>()
+                    .HasIndex(c => c.Code)
+                    .IsUnique();
+
+            modelBuilder.Entity<Category>()
+                    .HasIndex(c => c.Name)
+                    .IsUnique();
+
+            modelBuilder.ApplyConfigurationsFromAssembly(typeof(TenantDbContext).Assembly);
         }
     }
 }
