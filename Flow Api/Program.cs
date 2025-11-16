@@ -17,6 +17,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
+using Flow_Api.Services.Interfaces.Management;
+using Flow_Api.Services.Implementations.Management;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -66,6 +68,10 @@ builder.Services.AddSwaggerGen(c =>
 // Configure Database
 builder.Services.AddDbContext<MasterDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddDbContext<TenantDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
+);
 
 // Configure Authentication
 var jwtSettings = builder.Configuration.GetSection("Jwt");
@@ -121,6 +127,8 @@ builder.Services.AddScoped<ITenantProvisioningService, TenantProvisioningService
 builder.Services.AddScoped<IAuditLogService, AuditLogService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IBrandService, BrandService>();
+
 
 // Configure Logging
 builder.Logging.ClearProviders();
@@ -152,3 +160,5 @@ app.MapControllers();
 app.MapGet("/health", () => Results.Ok(new { status = "Healthy", timestamp = DateTime.UtcNow }));
 
 app.Run();
+
+app.UseDeveloperExceptionPage();
