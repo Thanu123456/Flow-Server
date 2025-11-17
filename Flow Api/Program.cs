@@ -1,7 +1,8 @@
 using Flow_Api.Data.Contexts;
+using Flow_Api.Data.Seeds;
 using Flow_Api.Data.UnitOfWork;
-using Flow_Api.Middleware;
 using Flow_Api.Mappings; // <-- Added using for the mapping profiles
+using Flow_Api.Middleware;
 using Flow_Api.Repositories.Implementations.Master;
 using Flow_Api.Repositories.Interfaces.Master;
 using Flow_Api.Services.Implementations.Auth;
@@ -128,6 +129,29 @@ builder.Logging.AddConsole();
 builder.Logging.AddDebug();
 
 var app = builder.Build();
+
+// Run database seeding
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var masterContext = services.GetRequiredService<MasterDbContext>();
+        var passwordService = services.GetRequiredService<IPasswordService>();
+
+        // Ensure database is created
+        await masterContext.Database.MigrateAsync();
+
+        // Run the seeder
+        var seeder = new MasterSeeder(masterContext, passwordService);
+        await seeder.SeedAsync();
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred while seeding the database.");
+    }
+}
 
 // Configure HTTP request pipeline
 if (app.Environment.IsDevelopment())
