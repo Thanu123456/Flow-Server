@@ -8,16 +8,15 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace Flow_Api.Migrations
+namespace Flow_Api.Migrations.TenantDb
 {
-    [DbContext(typeof(MasterDbContext))]
-    partial class MasterDbContextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(TenantDbContext))]
+    partial class TenantDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasDefaultSchema("public")
                 .HasAnnotation("ProductVersion", "9.0.9")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
@@ -81,47 +80,6 @@ namespace Flow_Api.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("audit_logs", "public");
-                });
-
-            modelBuilder.Entity("Flow_Api.Models.Entities.Master.SystemSetting", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Category")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("text");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("IsEncrypted")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("Key")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Value")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("SystemSettings", "public");
                 });
 
             modelBuilder.Entity("Flow_Api.Models.Entities.Master.Tenant", b =>
@@ -376,7 +334,7 @@ namespace Flow_Api.Migrations
                     b.HasIndex("Status")
                         .HasDatabaseName("ix_brands_status");
 
-                    b.ToTable("brands", "public");
+                    b.ToTable("brands", (string)null);
                 });
 
             modelBuilder.Entity("Flow_Api.Models.Entities.Master.AuditLog", b =>
