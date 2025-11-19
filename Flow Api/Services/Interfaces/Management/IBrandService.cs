@@ -13,6 +13,8 @@ namespace Flow_Api.Services.Interfaces.Management
 
         Task<BrandDto> UpdateBrandAsync(Guid id, UpdateBrandRequestDto dto);
 
+        Task<bool> DeleteBrandAsync(Guid id);
+
         Task<int> GetBrandProductCountAsync(Guid id);
 
         Task<byte[]> ExportBrandsToPDFAsync();

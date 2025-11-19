@@ -106,9 +106,21 @@ namespace Flow_Api.Services.Implementations.Management
             };
         }
 
-        public Task<int> GetBrandProductCountAsync(Guid id)
+        public async Task<int> GetBrandProductCountAsync(Guid id)
         {
             throw new NotImplementedException();
+        }
+
+        public async Task<bool> DeleteBrandAsync(Guid id)
+        {
+            var brand = await _context.Brands.FindAsync(id);
+
+            if(brand == null)
+                return false;
+
+            _context.Brands.Remove(brand);
+            await _context.SaveChangesAsync();
+            return true;
         }
 
         public async Task<byte[]> ExportBrandsToPDFAsync()

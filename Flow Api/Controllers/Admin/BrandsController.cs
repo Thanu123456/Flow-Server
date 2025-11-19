@@ -1,4 +1,5 @@
 ﻿using Flow_Api.Dtos.Brands.Request;
+using Flow_Api.Dtos.Brands.Response;
 using Flow_Api.Services.Interfaces.Management;
 using Microsoft.AspNetCore.Mvc;
 
@@ -59,6 +60,25 @@ namespace Flow_Api.Controllers.Admin
             }
 
         } 
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteBrand(Guid id)
+        {
+            try
+            {
+                var brand = await _service.DeleteBrandAsync(id);
+
+                if(!brand)
+                    return NotFound(new { message = "Brands not found"});
+
+                return Ok(new {message = "Brand deleted suceesfully!"});
+
+            }
+            catch(Exception ex)
+            {
+                return BadRequest(new {message = ex.Message});
+            }
+        }
 
         [HttpGet("export/pdf")]
         public async Task<IActionResult> ExportBrandsToPdf()
